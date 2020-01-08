@@ -1,20 +1,18 @@
 import Web3 from "web3";
-import SimpleStorage from "./contracts/SimpleStorage.json";
-import ComplexStorage from "./contracts/ComplexStorage.json";
-import TutorialToken from "./contracts/TutorialToken.json";
+import JurStatus from "./contracts/JurStatus.json";
 
 const options = {
   web3: {
     block: false,
-    customProvider: new Web3("ws://localhost:8545"),
+    customProvider: new Web3("ws://localhost:8545")
   },
-  contracts: [SimpleStorage, ComplexStorage, TutorialToken],
+  contracts: [JurStatus],
   events: {
-    SimpleStorage: ["StorageSet"],
+    JurStatus: ["statusTypes"]
   },
   polls: {
-    accounts: 1500,
-  },
+    accounts: 1500
+  }
 };
 
 export default options;
