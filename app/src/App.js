@@ -1,6 +1,11 @@
 import React, { Component } from "react";
 import { DrizzleProvider } from "@drizzle/react-plugin";
-import { LoadingContainer, AccountData } from "@drizzle/react-components";
+import {
+  LoadingContainer,
+  AccountData,
+  ContractData,
+  ContractForm
+} from "@drizzle/react-components";
 
 import "./App.css";
 
@@ -8,13 +13,15 @@ import drizzleOptions from "./drizzleOptions";
 import MyContainer from "./MyContainer";
 
 class App extends Component {
+  componentDidMount() {
+    window.ethereum.enable();
+  }
   render() {
     return (
       <DrizzleProvider options={drizzleOptions}>
-        <div>
-          <div>Hello world</div>
-          <AccountData accountIndex={0} units={"ether"} precision={2} />
-        </div>
+        <LoadingContainer>
+          <MyContainer />
+        </LoadingContainer>
       </DrizzleProvider>
     );
   }

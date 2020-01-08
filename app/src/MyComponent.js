@@ -7,4 +7,13 @@ import {
 
 import logo from "./logo.png";
 
-export default ({ accounts }) => <div className="App"></div>;
+export default ({ accounts }) => {
+  console.log("Accounts", accounts);
+  return (
+    <div className="App">
+      <div>Hello world</div>
+      <AccountData accountIndex={0} units="ether" precision={3} />
+      <ContractForm contract="JurStatus" method="addStatusType" />
+    </div>
+  );
+};
