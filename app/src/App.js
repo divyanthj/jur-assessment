@@ -13,9 +13,6 @@ import drizzleOptions from "./drizzleOptions";
 import MyContainer from "./MyContainer";
 
 class App extends Component {
-  componentDidMount() {
-    window.ethereum.enable();
-  }
   render() {
     return (
       <DrizzleProvider options={drizzleOptions}>

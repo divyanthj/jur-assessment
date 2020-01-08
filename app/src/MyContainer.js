@@ -5,9 +5,8 @@ const mapStateToProps = state => {
   console.log("States", state);
   return {
     accounts: state.accounts,
-    SimpleStorage: state.contracts.SimpleStorage,
-    TutorialToken: state.contracts.TutorialToken,
-    drizzleStatus: state.drizzleStatus
+    drizzleStatus: state.drizzleStatus,
+    contracts: state.contracts
   };
 };
 
