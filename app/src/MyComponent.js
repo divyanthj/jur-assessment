@@ -19,12 +19,6 @@ export default ({ accounts, contracts }) => {
           method="addStatusType"
           labels={["Add new status type here"]}
         />
-        <ContractData
-          contract="JurStatus"
-          method="statusTypes"
-          labels={["Add new status type here"]}
-          toUtf8
-        />
       </div>
     </div>
   );
