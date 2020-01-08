@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { DrizzleProvider } from "@drizzle/react-plugin";
-import { LoadingContainer } from "@drizzle/react-components";
+import { LoadingContainer, AccountData } from "@drizzle/react-components";
 
 import "./App.css";
 
@@ -11,9 +11,10 @@ class App extends Component {
   render() {
     return (
       <DrizzleProvider options={drizzleOptions}>
-        <LoadingContainer>
-          <MyContainer />
-        </LoadingContainer>
+        <div>
+          <div>Hello world</div>
+          <AccountData accountIndex={0} units={"ether"} precision={2} />
+        </div>
       </DrizzleProvider>
     );
   }
