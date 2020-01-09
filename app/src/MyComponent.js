@@ -1,35 +1,37 @@
 import React from "react";
-import {
-  AccountData,
-  ContractData,
-  ContractForm
-} from "@drizzle/react-components";
 
 import logo from "./logo.png";
 
 class MyComponent extends React.Component {
-  render() {
-    return (
-      <div className="App">
-        <div>
-          <div>This is your contract address</div>
-          <AccountData accountIndex={0} units="ether" precision={2} />
-          <ContractForm
-            contract="JurStatus"
-            method="addStatusType"
-            labels={["Add new status type here"]}
-          />
-          <ContractForm
-            contract="JurStatus"
-            method="addJurStatus"
-            labels={["Holder", "Type position"]}
-          />
-          <div>Number of statuses</div>
+  state = { dataKey: null };
 
-          <ContractData contract="JurStatus" method="statusCount" />
-        </div>
-      </div>
-    );
+  componentDidMount() {
+    const { drizzle, drizzleState } = this.props;
+
+    const contract = drizzle.contracts.JurStatus;
+
+    // let drizzle know we want to watch the `myString` method
+    const dataKey = contract.methods["statusCount"].cacheCall();
+    this.setState({
+      keyStatusCount: contract.methods["statusCount"].cacheCall(),
+      keyStatusTypes: contract.methods["statusTypes"].cacheCall(),
+      keyStatuses: contract.methods["status"].cacheCall()
+    });
+  }
+
+  render() {
+    // get the contract state from drizzleState
+    const { JurStatus } = this.props.drizzleState.contracts;
+    const statusCount = JurStatus.statusCount[this.state.keyStatusCount];
+    const statusTypes = JurStatus.statusTypes[this.state.keyStatusTypes];
+    console.log({
+      statusCount,
+      statusTypes
+    });
+    // using the saved `dataKey`, get the variable we're interested in
+
+    // if it exists, then we display its value
+    return <p></p>;
   }
 }
 

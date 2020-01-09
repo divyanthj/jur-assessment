@@ -1,25 +1,46 @@
 import React, { Component } from "react";
-import { DrizzleProvider } from "@drizzle/react-plugin";
-import {
-  LoadingContainer,
-  AccountData,
-  ContractData,
-  ContractForm
-} from "@drizzle/react-components";
 
 import "./App.css";
 
 import drizzleOptions from "./drizzleOptions";
-import MyContainer from "./MyContainer";
+import MyComponent from "./MyComponent";
 
 class App extends Component {
+  state = { loading: true, drizzleState: null };
+
+  componentDidMount() {
+    const { drizzle } = this.props;
+
+    // subscribe to changes in the store
+    this.unsubscribe = drizzle.store.subscribe(() => {
+      // every time the store updates, grab the state from drizzle
+      const drizzleState = drizzle.store.getState();
+
+      // check to see if it's ready, if so, update local component state
+      if (drizzleState.drizzleStatus.initialized) {
+        this.setState({ loading: false, drizzleState });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
   render() {
+    const { drizzle } = this.props;
+    console.log("Props drizzle", drizzle);
+    if (this.state.loading) return "Loading Drizzle...";
     return (
-      <DrizzleProvider options={drizzleOptions}>
-        <LoadingContainer>
-          <MyContainer />
-        </LoadingContainer>
-      </DrizzleProvider>
+      <div className="App">
+        Drizzle is ready
+        {
+          <MyComponent
+            drizzle={drizzle}
+            drizzleState={this.state.drizzleState}
+          />
+        }
+      </div>
     );
   }
 }
