@@ -6,14 +6,7 @@ class MyComponent extends React.Component {
   state = { dataKeys: {}, enteredStatusType: "" };
 
   componentDidMount() {
-    const { drizzle, drizzleState } = this.props;
-
-    const contract = drizzle.contracts.JurStatus;
-    let dataKeys = {};
-    dataKeys["statusCount"] = contract.methods["statusCount"].cacheCall();
-    this.setState({
-      dataKeys
-    });
+    this.fetchDataFromState();
     // let drizzle know we want to watch the `myString` method
     // const dataKey = contract.methods["statusCount"].cacheCall();
     // this.setState({
@@ -22,6 +15,29 @@ class MyComponent extends React.Component {
     //   keyStatuses: contract.methods["status"].cacheCall()
     // });
   }
+
+  fetchDataFromState = () => {
+    const { drizzle, drizzleState } = this.props;
+
+    const contract = drizzle.contracts.JurStatus;
+    const { JurStatus } = this.props.drizzleState.contracts;
+
+    let dataKeys = {};
+    dataKeys["statusCount"] = contract.methods["statusCount"].cacheCall();
+    dataKeys["statusTypes"] = contract.methods["statusTypes"].cacheCall([0]);
+    const statusCount = JurStatus.statusCount[dataKeys.statusCount];
+    const statusTypes = JurStatus.statusTypes[dataKeys.statusTypes];
+    this.setState({
+      dataKeys,
+      statusCount,
+      statusTypes
+    });
+    console.log({
+      dataKeys,
+      statusCount,
+      statusTypes
+    });
+  };
 
   handleInputChange = e => {
     this.setState({
@@ -56,16 +72,13 @@ class MyComponent extends React.Component {
   render() {
     // get the contract state from drizzleState
     const { enteredStatusType } = this.state;
-    const { JurStatus } = this.props.drizzleState.contracts;
-    const statusCount = JurStatus.statusCount[this.state.dataKeys.statusCount];
-    console.log({
-      statusCount
-    });
+
     // using the saved `dataKey`, get the variable we're interested in
 
     // if it exists, then we display its value
     return (
       <div>
+        <button onClick={this.fetchDataFromState}>Get data</button>
         <input
           onChange={this.handleInputChange}
           placeholder={"New status type"}
