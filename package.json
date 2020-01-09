@@ -1,7 +1,7 @@
 {
-  "name": "jur-status-smart-contract",
+  "name": "drizzle-box",
   "version": "1.0.0",
-  "description": "This repo will contain the main smart contract for the Jur status.",
+  "description": "",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -11,11 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jurteam/jur-status-smart-contract.git"
+    "url": "git+https://github.com/truffle-box/drizzle-box.git"
   },
+  "keywords": [],
   "author": "",
-  "homepage": "https://github.com/jurteam/jur-status-smart-contract#readme",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/truffle-box/drizzle-box/issues"
+  },
+  "homepage": "https://github.com/truffle-box/drizzle-box#readme",
   "dependencies": {
-    "ganache-cli": "^6.7.0"
+    "openzeppelin-solidity": "^2.1.1"
   }
 }
