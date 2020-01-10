@@ -1,6 +1,7 @@
 import React from "react";
 
 import logo from "./logo.png";
+import { ContractForm } from "@drizzle/react-components";
 
 class MyComponent extends React.Component {
   state = {
@@ -21,7 +22,7 @@ class MyComponent extends React.Component {
     // });
   }
 
-  fetchStatusTypesCount = () => {
+  fetchStatusCount = () => {
     const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
@@ -38,44 +39,48 @@ class MyComponent extends React.Component {
       dataKeys: {
         ...dataKeys
       },
-      statusCount
+      statusCount: parseInt(statusCount)
     });
   };
 
-  fetchAllStatusTypes = () => {
+  fetchAllStatuses = () => {
     const { statusCount } = this.state;
     const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
+    console.log("Jur Status", JurStatus);
     let dataKeys = {};
-    let statusTypes = [];
-    for (var i = 0; i <= statusCount; i++) {
-      dataKeys["statusTypes_" + i] = contract.methods["statusTypes"].cacheCall([
-        i
-      ]);
-      statusTypes.push(
-        JurStatus.statusTypes[dataKeys["statusTypes_" + i]]
-          ? JurStatus.statusTypes[dataKeys["statusTypes_" + i]].value
-          : null
-      );
-    }
-    this.setState({
-      dataKeys: {
-        ...dataKeys
-      },
-      statusTypes
-    });
-    //dataKeys["statusTypes"] = contract.methods["statusTypes"]
+    let status = [];
+    let tempDataKey = contract.methods.status.cacheCall(
+      "0x1CC458D7883BE736E8a8f6b809B4Ad345216844e"
+    );
+    let result = JurStatus.status[tempDataKey];
+    console.log("Result", result);
+    // for (var i = 0; i <= statusCount; i++) {
+    //   console.log("Fetching for status ", i, "status_" + i, dataKeys);
+    //   dataKeys["status_" + i] = contract.methods["status"].cacheCall(i); // Storing status key for each entry
+    //   const pulledStatus = JurStatus.status[dataKeys["status_" + i]];
+    //   //console.log("Status from contract", pulledStatus);
+    //   status.push(pulledStatus);
+    // }
+    // //console.log("Status", status, dataKeys);
+    // this.setState({
+    //   dataKeys: {
+    //     ...dataKeys
+    //   },
+    //   status
+    // });
+    // dataKeys["statusTypes"] = contract.methods["statusTypes"];
+    // console.log("Statuses", {
+    //   status,
+    //   dataKeys
+    // });
   };
 
   handleFetchData = () => {
-    this.fetchStatusTypesCount();
-    this.fetchAllStatusTypes();
-    console.log({
-      types: this.state.statusTypes,
-      count: this.state.statusCount
-    });
+    this.fetchStatusCount();
+    this.fetchAllStatuses();
   };
 
   handleInputChange = e => {
@@ -84,12 +89,15 @@ class MyComponent extends React.Component {
     });
   };
 
-  handleSubmit = e => {
+  handleSubmit = (params, method) => {
     const { drizzle } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
-    const submittedData = this.state[e.target.name];
-    const stackId = contract.methods["addStatusType"].cacheSend(submittedData);
+    let submittedData = [];
+    params.forEach(param => {
+      submittedData.push(this.state[param]);
+    });
+    const stackId = contract.methods[method].cacheSend(...submittedData);
     this.setState({ stackId });
   };
 
@@ -110,7 +118,11 @@ class MyComponent extends React.Component {
 
   render() {
     // get the contract state from drizzleState
-    const { enteredStatusType } = this.state;
+    const {
+      enteredStatusType,
+      enteredStatusHolderAddress,
+      enteredStatusTypeIndex
+    } = this.state;
 
     // using the saved `dataKey`, get the variable we're interested in
 
@@ -118,15 +130,46 @@ class MyComponent extends React.Component {
     return (
       <div>
         <button onClick={this.handleFetchData}>Get data</button>
-        <input
-          onChange={this.handleInputChange}
-          placeholder={"New status type"}
-          name={"enteredStatusType"}
-          value={enteredStatusType}
-        />
-        <button onClick={this.handleSubmit} name={"enteredStatusType"}>
-          Submit
-        </button>
+        <div>
+          <input
+            onChange={this.handleInputChange}
+            placeholder={"New status type"}
+            name={"enteredStatusType"}
+            value={enteredStatusType}
+          />
+          <button
+            onClick={() =>
+              this.handleSubmit(["enteredStatusType"], "addStatusType")
+            }
+          >
+            Submit
+          </button>
+        </div>
+        <div>
+          <input
+            onChange={this.handleInputChange}
+            placeholder={"New status type"}
+            name={"enteredStatusHolderAddress"}
+            value={enteredStatusHolderAddress}
+          />
+          <input
+            onChange={this.handleInputChange}
+            placeholder={"New status type"}
+            name={"enteredStatusTypeIndex"}
+            value={enteredStatusTypeIndex}
+          />
+          <button
+            onClick={() =>
+              this.handleSubmit(
+                ["enteredStatusHolderAddress", "enteredStatusTypeIndex"],
+                "addJurStatus"
+              )
+            }
+          >
+            Submit
+          </button>
+        </div>
+
         <div>{this.getTxStatus()}</div>
       </div>
     );

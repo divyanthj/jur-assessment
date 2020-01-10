@@ -29,7 +29,6 @@ class App extends Component {
 
   render() {
     const { drizzle } = this.props;
-    console.log("Props drizzle", drizzle);
     if (this.state.loading) return "Loading Drizzle...";
     return (
       <div className="App">
