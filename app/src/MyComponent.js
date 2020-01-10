@@ -29,18 +29,19 @@ class MyComponent extends React.Component {
     statusTypes: [],
     statuses: [],
     addresses: [],
-    statusCount: 0
+    statusCount: 0,
+    pollingInterval: 100
   };
 
   componentDidMount() {
     setTimeout(this.fetchStatusTypesCount, 1000);
-    // let drizzle know we want to watch the `myString` method
-    // const dataKey = contract.methods["statusCount"].cacheCall();
-    // this.setState({
-    //   keyStatusCount: contract.methods["statusCount"].cacheCall(),
-    //   keyStatusTypes: contract.methods["statusTypes"].cacheCall(),
-    //   keyStatuses: contract.methods["status"].cacheCall()
-    // });
+    let pollId = setInterval(() => {
+      if (this.state.statuses.length > 0) {
+        clearInterval(pollId);
+      }
+      this.handleFetchData();
+      console.log("Fetching data");
+    }, this.state.pollingInterval);
   }
 
   fetchStatusCount = () => {
@@ -169,17 +170,6 @@ class MyComponent extends React.Component {
     // if it exists, then we display its value
     return (
       <Grid container style={styles.container}>
-        <Grid item xs={12}>
-          {/* Button to fetch data */}
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={this.handleFetchData}
-          >
-            Get data
-          </Button>
-        </Grid>
         <Grid item xs={12}>
           {/* Form for adding new status type */}
           <Input
