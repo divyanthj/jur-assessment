@@ -1,8 +1,16 @@
 import React from "react";
-
+import moment from "moment-timezone";
 import logo from "./logo.png";
+import Result from "web3";
 import { ContractForm } from "@drizzle/react-components";
-
+const styles = {
+  tableCell: {
+    width: 400,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  }
+};
 class MyComponent extends React.Component {
   state = {
     dataKeys: {},
@@ -77,40 +85,24 @@ class MyComponent extends React.Component {
     const { JurStatus } = this.props.drizzleState.contracts;
     console.log("Jur Status", JurStatus);
     let dataKeys = {};
-    let status = [];
+    let statuses = [];
     addresses.forEach((address, index) => {
       dataKeys["status_" + index] = contract.methods["status"].cacheCall(
         address.value
       );
       const pulledStatus = JurStatus.status[dataKeys["status_" + index]];
-      if (pulledStatus) status.push(pulledStatus);
+      if (pulledStatus) {
+        const statusObject = {
+          holder: address.value,
+          ...JSON.parse(JSON.stringify(pulledStatus.value))
+        };
+        statuses.push(statusObject);
+      }
     });
-
-    console.log("Status after retrieving", status);
-    // let tempDataKey = contract.methods.status.cacheCall(
-    //   "0x1CC458D7883BE736E8a8f6b809B4Ad345216844e"
-    // );
-    // let result = JurStatus.status[tempDataKey];
-    // console.log("Result", result);
-    // for (var i = 0; i <= statusCount; i++) {
-    //   console.log("Fetching for status ", i, "status_" + i, dataKeys);
-    //   dataKeys["status_" + i] = contract.methods["status"].cacheCall(i); // Storing status key for each entry
-    //   const pulledStatus = JurStatus.status[dataKeys["status_" + i]];
-    //   //console.log("Status from contract", pulledStatus);
-    //   status.push(pulledStatus);
-    // }
-    // //console.log("Status", status, dataKeys);
-    // this.setState({
-    //   dataKeys: {
-    //     ...dataKeys
-    //   },
-    //   status
-    // });
-    // dataKeys["statusTypes"] = contract.methods["statusTypes"];
-    // console.log("Statuses", {
-    //   status,
-    //   dataKeys
-    // });
+    console.log("Statuses", statuses);
+    this.setState({
+      statuses
+    });
   };
 
   handleFetchData = () => {
@@ -184,13 +176,13 @@ class MyComponent extends React.Component {
         <div>
           <input
             onChange={this.handleInputChange}
-            placeholder={"New status type"}
+            placeholder={"Status holder address"}
             name={"enteredStatusHolderAddress"}
             value={enteredStatusHolderAddress}
           />
           <input
             onChange={this.handleInputChange}
-            placeholder={"New status type"}
+            placeholder={"Status type index"}
             name={"enteredStatusTypeIndex"}
             value={enteredStatusTypeIndex}
           />
@@ -207,6 +199,37 @@ class MyComponent extends React.Component {
         </div>
 
         <div>{this.getTxStatus()}</div>
+        <div>
+          {
+            <table>
+              <tr>
+                <th style={styles.tableCell}>Holder</th>
+                <th style={styles.tableCell}>Activation time</th>
+                <th style={styles.tableCell}>Status type</th>
+              </tr>
+              {this.state.statuses.map((statusItem, index) => {
+                console.log(
+                  "Status item",
+                  statusItem,
+                  moment(statusItem.activationTime * 1000).utc()
+                );
+                return (
+                  <div>
+                    <tr key={index}>
+                      <td style={styles.tableCell}>{statusItem.holder}</td>
+                      <td style={styles.tableCell}>
+                        {moment(statusItem.activationTime * 1000).format(
+                          "YYYY-MM-DD HH:mm"
+                        )}
+                      </td>
+                      <td style={styles.tableCell}>{statusItem.statusType}</td>
+                    </tr>
+                  </div>
+                );
+              })}
+            </table>
+          }
+        </div>
       </div>
     );
   }
