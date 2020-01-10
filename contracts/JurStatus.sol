@@ -19,6 +19,8 @@ contract JurStatus {
     /** Dynamic array holding the status types */
     string[] public statusTypes;
 
+    /** Dynamic array holding the addresses */
+    address[] public addresses;
     /** Mapping between the address of the Jur Status holders and their properties */
     mapping(address  => Status) public status;
 
@@ -52,6 +54,7 @@ contract JurStatus {
     onlyOwner {
         require(_statusHolder != address(0), "Please provide a valid address.");
         status[_statusHolder] = Status(now, true, statusTypes[_statusType]);
+        addresses.push(_statusHolder);
         statusCount++;
 
         emit StatusAdded(_statusHolder, now, statusTypes[_statusType]);
