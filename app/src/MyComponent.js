@@ -2,15 +2,26 @@ import React from "react";
 import moment from "moment-timezone";
 import logo from "./logo.png";
 import Result from "web3";
+import {
+  Input,
+  Button,
+  Grid,
+  Table,
+  TableBody,
+  TableHead,
+  TableCell,
+  TableRow,
+  TableContainer
+} from "@material-ui/core";
 import { ContractForm } from "@drizzle/react-components";
 const styles = {
-  tableCell: {
-    width: 400,
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis"
+  tableCell: {},
+  table: {
+    minWidth: 650,
+    tableLayout: "fixed"
   }
 };
+
 class MyComponent extends React.Component {
   state = {
     dataKeys: {},
@@ -149,44 +160,63 @@ class MyComponent extends React.Component {
     const {
       enteredStatusType,
       enteredStatusHolderAddress,
-      enteredStatusTypeIndex
+      enteredStatusTypeIndex,
+      statuses
     } = this.state;
 
     // using the saved `dataKey`, get the variable we're interested in
 
     // if it exists, then we display its value
     return (
-      <div>
-        <button onClick={this.handleFetchData}>Get data</button>
-        <div>
-          <input
+      <Grid container style={styles.container}>
+        <Grid item xs={12}>
+          {/* Button to fetch data */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={this.handleFetchData}
+          >
+            Get data
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          {/* Form for adding new status type */}
+          <Input
             onChange={this.handleInputChange}
             placeholder={"New status type"}
             name={"enteredStatusType"}
             value={enteredStatusType}
           />
-          <button
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
             onClick={() =>
               this.handleSubmit(["enteredStatusType"], "addStatusType")
             }
           >
             Submit
-          </button>
-        </div>
-        <div>
-          <input
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          {/* Form for adding address and type */}
+          <Input
             onChange={this.handleInputChange}
             placeholder={"Status holder address"}
             name={"enteredStatusHolderAddress"}
             value={enteredStatusHolderAddress}
           />
-          <input
+          <Input
             onChange={this.handleInputChange}
             placeholder={"Status type index"}
             name={"enteredStatusTypeIndex"}
             value={enteredStatusTypeIndex}
           />
-          <button
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
             onClick={() =>
               this.handleSubmit(
                 ["enteredStatusHolderAddress", "enteredStatusTypeIndex"],
@@ -195,42 +225,42 @@ class MyComponent extends React.Component {
             }
           >
             Submit
-          </button>
-        </div>
+          </Button>
+          <Grid item xs={9}>
+            {/* Table of addresses, activation times and types */}
+            <Grid container>
+              <Grid item xs={6}>
+                Holder
+              </Grid>
+              <Grid item xs={3}>
+                Activation Time
+              </Grid>
+              <Grid item xs={3}>
+                Status Type
+              </Grid>
+            </Grid>
+            {statuses.map(statusItem => {
+              return (
+                <Grid container>
+                  <Grid item xs={6}>
+                    {statusItem.holder}
+                  </Grid>
+                  <Grid item xs={3}>
+                    {moment(statusItem.activationTime * 1000).format(
+                      "YYYY-MM-DD HH:mm"
+                    )}
+                  </Grid>
+                  <Grid item xs={3}>
+                    {statusItem.statusType}
+                  </Grid>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Grid>
 
         <div>{this.getTxStatus()}</div>
-        <div>
-          {
-            <table>
-              <tr>
-                <th style={styles.tableCell}>Holder</th>
-                <th style={styles.tableCell}>Activation time</th>
-                <th style={styles.tableCell}>Status type</th>
-              </tr>
-              {this.state.statuses.map((statusItem, index) => {
-                console.log(
-                  "Status item",
-                  statusItem,
-                  moment(statusItem.activationTime * 1000).utc()
-                );
-                return (
-                  <div>
-                    <tr key={index}>
-                      <td style={styles.tableCell}>{statusItem.holder}</td>
-                      <td style={styles.tableCell}>
-                        {moment(statusItem.activationTime * 1000).format(
-                          "YYYY-MM-DD HH:mm"
-                        )}
-                      </td>
-                      <td style={styles.tableCell}>{statusItem.statusType}</td>
-                    </tr>
-                  </div>
-                );
-              })}
-            </table>
-          }
-        </div>
-      </div>
+      </Grid>
     );
   }
 }
