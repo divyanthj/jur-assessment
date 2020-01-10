@@ -8,7 +8,9 @@ class MyComponent extends React.Component {
     dataKeys: {},
     enteredStatusType: "",
     statusTypes: [],
-    statusCount: "0"
+    statuses: [],
+    addresses: [],
+    statusCount: 0
   };
 
   componentDidMount() {
@@ -43,8 +45,32 @@ class MyComponent extends React.Component {
     });
   };
 
-  fetchAllStatuses = () => {
+  fetchAllAddresses = () => {
     const { statusCount } = this.state;
+    const { drizzle, drizzleState } = this.props;
+
+    const contract = drizzle.contracts.JurStatus;
+    const { JurStatus } = this.props.drizzleState.contracts;
+    let dataKeys = {};
+    let addresses = [];
+    for (var i = 0; i < statusCount; i++) {
+      dataKeys["address_" + i] = contract.methods["addresses"].cacheCall(i); // Storing status key for each entry
+      const pulledAddress = JurStatus.addresses[dataKeys["address_" + i]];
+      console.log("Address from contract", pulledAddress, i);
+      if (pulledAddress) addresses.push(pulledAddress);
+    }
+    //console.log("Status", status, dataKeys);
+    this.setState({
+      dataKeys: {
+        ...dataKeys
+      },
+      addresses
+    });
+    console.log("Pulled addresses", addresses);
+  };
+
+  fetchAllStatuses = () => {
+    const { statusCount, addresses } = this.state;
     const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
@@ -52,11 +78,20 @@ class MyComponent extends React.Component {
     console.log("Jur Status", JurStatus);
     let dataKeys = {};
     let status = [];
-    let tempDataKey = contract.methods.status.cacheCall(
-      "0x1CC458D7883BE736E8a8f6b809B4Ad345216844e"
-    );
-    let result = JurStatus.status[tempDataKey];
-    console.log("Result", result);
+    addresses.forEach((address, index) => {
+      dataKeys["status_" + index] = contract.methods["status"].cacheCall(
+        address.value
+      );
+      const pulledStatus = JurStatus.status[dataKeys["status_" + index]];
+      if (pulledStatus) status.push(pulledStatus);
+    });
+
+    console.log("Status after retrieving", status);
+    // let tempDataKey = contract.methods.status.cacheCall(
+    //   "0x1CC458D7883BE736E8a8f6b809B4Ad345216844e"
+    // );
+    // let result = JurStatus.status[tempDataKey];
+    // console.log("Result", result);
     // for (var i = 0; i <= statusCount; i++) {
     //   console.log("Fetching for status ", i, "status_" + i, dataKeys);
     //   dataKeys["status_" + i] = contract.methods["status"].cacheCall(i); // Storing status key for each entry
@@ -80,7 +115,8 @@ class MyComponent extends React.Component {
 
   handleFetchData = () => {
     this.fetchStatusCount();
-    this.fetchAllStatuses();
+    if (this.state.statusCount > 0) this.fetchAllAddresses();
+    if (this.state.addresses.length > 0) this.fetchAllStatuses();
   };
 
   handleInputChange = e => {
