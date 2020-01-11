@@ -19,6 +19,9 @@ Then after cloning this repo,
 4. Here, run `compile` and then run `migrate`. Leave the console running.
 5. Start Ganache. Once you see a list of accounts on the local blockchain, click `show keys` and copy a private key.
 6. Import that key into `MetaMask`
-7. While leaving the truffle console running, open another terminal and navigate to the `/app` directory
-8. Do `npm start`. The client side dapp will open in a new browser window. If not, go to `https://localhost:3000/`
-9. If the dapp found Metamask, the local node from `truffle` and local blockchain from `ganache`, the client should run correctly.
+7. Make sure Metamask is connected to the blockchain on ganache. At the top of Metamask. Typically Ganache runs on `localhost:7545`
+8. While leaving the truffle console running, open another terminal and navigate to the `/app` directory
+9. Do `npm start`. The client side dapp will open in a new browser window. If not, go to `https://localhost:3000/`
+10. If the dapp found Metamask, the local node from `truffle` and local blockchain from `ganache`, the client should run correctly.
+
+If you wish to swap owner addresses for the smart contract, first switch accounts on Metamask, then follow steps _3_ to _9_.
