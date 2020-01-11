@@ -1,7 +1,6 @@
 import React from "react";
 import moment from "moment-timezone";
 import logo from "./logo.png";
-import Result from "web3";
 import {
   Input,
   Button,
@@ -47,9 +46,20 @@ class MyComponent extends React.Component {
     this.pollData();
   }
 
+  componentDidUpdate = () => {
+    const transactionStatus = this.getTxStatus();
+    if (this.state.transactionStatus !== transactionStatus) {
+      if (transactionStatus === "success") setTimeout(this.pollData, 2000);
+      this.setState({
+        transactionStatus
+      });
+    }
+  };
+
   pollData = () => {
     let pollCount = 0;
     let pollLimit = 10;
+    console.log("Polling data..");
     let pollId = setInterval(() => {
       if (this.state.statuses.length > 0 || pollCount === pollLimit) {
         clearInterval(pollId);
@@ -61,7 +71,7 @@ class MyComponent extends React.Component {
 
   fetchPrimitive = variableName => {
     const { drizzle, drizzleState } = this.props;
-
+    console.log("Fetching primitive ", variableName);
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
 
@@ -82,7 +92,7 @@ class MyComponent extends React.Component {
 
   fetchArray = (arrayName, arrayCounterName) => {
     const { drizzle, drizzleState } = this.props;
-
+    console.log("Fetching array ", arrayName);
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
     let dataKeys = {};
@@ -103,7 +113,7 @@ class MyComponent extends React.Component {
   fetchAllStatuses = () => {
     const { statusCount, addresses } = this.state;
     const { drizzle, drizzleState } = this.props;
-
+    console.log("Fetching all statuses");
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
     let dataKeys = {};
@@ -137,13 +147,15 @@ class MyComponent extends React.Component {
 
   handleInputChange = e => {
     this.setState({
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
+      transactionStatus: null
     });
   };
 
   handleSelectChange = e => {
     this.setState({
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
+      transactionStatus: null
     });
   };
 
@@ -158,6 +170,7 @@ class MyComponent extends React.Component {
     });
     const stackId = contract.methods[method].cacheSend(...submittedData);
     this.setState({ stackId });
+    console.log("Drizzle state", drizzleState);
   };
 
   getTxStatus = () => {
@@ -169,7 +182,7 @@ class MyComponent extends React.Component {
 
     // if transaction hash does not exist, don't display anything
     if (!txHash) return null;
-    return transactions[txHash].status;
+    return transactions[txHash] ? transactions[txHash].status : null;
   };
 
   render() {
