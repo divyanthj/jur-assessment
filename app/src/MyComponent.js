@@ -11,7 +11,8 @@ import {
   TableHead,
   TableCell,
   TableRow,
-  TableContainer
+  TableContainer,
+  Switch
 } from "@material-ui/core";
 import { ContractForm } from "@drizzle/react-components";
 const styles = {
@@ -34,6 +35,10 @@ class MyComponent extends React.Component {
   };
 
   componentDidMount() {
+    this.pollData();
+  }
+
+  pollData = () => {
     setTimeout(this.fetchStatusTypesCount, 1000);
     let pollId = setInterval(() => {
       if (this.state.statuses.length > 0) {
@@ -42,7 +47,7 @@ class MyComponent extends React.Component {
       this.handleFetchData();
       console.log("Fetching data");
     }, this.state.pollingInterval);
-  }
+  };
 
   fetchStatusCount = () => {
     const { drizzle, drizzleState } = this.props;
@@ -76,7 +81,6 @@ class MyComponent extends React.Component {
     for (var i = 0; i < statusCount; i++) {
       dataKeys["address_" + i] = contract.methods["addresses"].cacheCall(i); // Storing status key for each entry
       const pulledAddress = JurStatus.addresses[dataKeys["address_" + i]];
-      console.log("Address from contract", pulledAddress, i);
       if (pulledAddress) addresses.push(pulledAddress);
     }
     //console.log("Status", status, dataKeys);
@@ -86,7 +90,6 @@ class MyComponent extends React.Component {
       },
       addresses
     });
-    console.log("Pulled addresses", addresses);
   };
 
   fetchAllStatuses = () => {
@@ -95,7 +98,6 @@ class MyComponent extends React.Component {
 
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
-    console.log("Jur Status", JurStatus);
     let dataKeys = {};
     let statuses = [];
     addresses.forEach((address, index) => {
@@ -130,15 +132,17 @@ class MyComponent extends React.Component {
   };
 
   handleSubmit = (params, method) => {
-    const { drizzle } = this.props;
+    const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
+    const contractState = drizzleState.contracts.JurStatus;
     let submittedData = [];
     params.forEach(param => {
       submittedData.push(this.state[param]);
     });
     const stackId = contract.methods[method].cacheSend(...submittedData);
     this.setState({ stackId });
+    this.pollData();
   };
 
   getTxStatus = () => {
@@ -219,7 +223,7 @@ class MyComponent extends React.Component {
           <Grid item xs={9}>
             {/* Table of addresses, activation times and types */}
             <Grid container>
-              <Grid item xs={6}>
+              <Grid item xs={5}>
                 Holder
               </Grid>
               <Grid item xs={3}>
@@ -228,11 +232,15 @@ class MyComponent extends React.Component {
               <Grid item xs={3}>
                 Status Type
               </Grid>
+
+              <Grid item xs={1}>
+                Is active
+              </Grid>
             </Grid>
             {statuses.map(statusItem => {
               return (
                 <Grid container>
-                  <Grid item xs={6}>
+                  <Grid item xs={5}>
                     {statusItem.holder}
                   </Grid>
                   <Grid item xs={3}>
@@ -242,6 +250,27 @@ class MyComponent extends React.Component {
                   </Grid>
                   <Grid item xs={3}>
                     {statusItem.statusType}
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Switch
+                      checked={statusItem.isActive}
+                      onChange={() => {
+                        this.setState(
+                          {
+                            currentHolder: statusItem.holder,
+                            currentIsActive: !statusItem.isActive
+                          },
+                          () => {
+                            this.handleSubmit(
+                              ["currentHolder", "currentIsActive"],
+                              "changeState"
+                            );
+                          }
+                        );
+                      }}
+                      color="primary"
+                      inputProps={{ "aria-label": "primary checkbox" }}
+                    />
                   </Grid>
                 </Grid>
               );
