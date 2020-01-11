@@ -103,7 +103,6 @@ dist
 # TernJS port file
 .tern-port
 
-app/src/contracts
 app/node_modules
 node_modules
 build
