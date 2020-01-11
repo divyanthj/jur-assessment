@@ -26,6 +26,8 @@ contract JurStatus {
 
     /** Total count of Jur Statuses. */
     uint public statusCount;
+    /** Total count of Jur Status Types **/
+    uint public statusTypesCount;
 
     event StateChanged(address statusHolder, bool newState, uint timestamp);
     event StatusAdded(address statusHolder, uint activationTime, string statusType);
@@ -88,6 +90,7 @@ contract JurStatus {
     ) public
     onlyOwner {
         require(bytes(_statusType).length != 0, "Status type cannot be an empty string.");
+        statusTypesCount++;
         statusTypes.push(_statusType);
     }
 }

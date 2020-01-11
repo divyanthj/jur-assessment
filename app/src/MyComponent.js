@@ -31,6 +31,7 @@ class MyComponent extends React.Component {
     statuses: [],
     addresses: [],
     statusCount: 0,
+    statusTypesCount: 0,
     pollingInterval: 100
   };
 
@@ -39,56 +40,56 @@ class MyComponent extends React.Component {
   }
 
   pollData = () => {
-    setTimeout(this.fetchStatusTypesCount, 1000);
+    let pollCount = 0;
+    let pollLimit = 10;
     let pollId = setInterval(() => {
-      if (this.state.statuses.length > 0) {
+      if (this.state.statuses.length > 0 || pollCount === pollLimit) {
         clearInterval(pollId);
       }
       this.handleFetchData();
-      console.log("Fetching data");
+      pollCount++;
     }, this.state.pollingInterval);
   };
 
-  fetchStatusCount = () => {
+  fetchPrimitive = variableName => {
     const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
 
     let dataKeys = {};
-    dataKeys["statusCount"] = contract.methods["statusCount"].cacheCall();
+    dataKeys[variableName] = contract.methods[variableName].cacheCall();
     //dataKeys["statusTypes"] = contract.methods["statusTypes"].cacheCall([0]);
-    const statusCount = JurStatus.statusCount[dataKeys.statusCount]
-      ? JurStatus.statusCount[dataKeys.statusCount].value
+    const variable = JurStatus[variableName][dataKeys[variableName]]
+      ? JurStatus[variableName][dataKeys[variableName]].value
       : 0;
-    //const statusTypes = JurStatus.statusTypes[dataKeys.statusTypes];
+
     this.setState({
       dataKeys: {
         ...dataKeys
       },
-      statusCount: parseInt(statusCount)
+      [variableName]: variable
     });
   };
 
-  fetchAllAddresses = () => {
-    const { statusCount } = this.state;
+  fetchArray = (arrayName, arrayCounterName) => {
     const { drizzle, drizzleState } = this.props;
 
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
     let dataKeys = {};
-    let addresses = [];
-    for (var i = 0; i < statusCount; i++) {
-      dataKeys["address_" + i] = contract.methods["addresses"].cacheCall(i); // Storing status key for each entry
-      const pulledAddress = JurStatus.addresses[dataKeys["address_" + i]];
-      if (pulledAddress) addresses.push(pulledAddress);
+    let array = [];
+    for (var i = 0; i < this.state[arrayCounterName]; i++) {
+      dataKeys[arrayName + i] = contract.methods[arrayName].cacheCall(i); // Storing status key for each entry
+      const pulledItem = JurStatus[arrayName][dataKeys[arrayName + i]];
+      if (pulledItem) array.push(pulledItem);
     }
-    //console.log("Status", status, dataKeys);
+    console.log("Array " + arrayName, array);
     this.setState({
       dataKeys: {
         ...dataKeys
       },
-      addresses
+      [arrayName]: array
     });
   };
 
@@ -120,9 +121,13 @@ class MyComponent extends React.Component {
   };
 
   handleFetchData = () => {
-    this.fetchStatusCount();
-    if (this.state.statusCount > 0) this.fetchAllAddresses();
+    this.fetchPrimitive("statusCount");
+    this.fetchPrimitive("statusTypesCount");
+    if (this.state.statusCount > 0) this.fetchArray("addresses", "statusCount");
+    if (this.state.statusTypesCount > 0)
+      this.fetchArray("statusTypes", "statusTypesCount");
     if (this.state.addresses.length > 0) this.fetchAllStatuses();
+    //console.log("React state", this.state);
   };
 
   handleInputChange = e => {
@@ -168,7 +173,6 @@ class MyComponent extends React.Component {
       enteredStatusTypeIndex,
       statuses
     } = this.state;
-
     // using the saved `dataKey`, get the variable we're interested in
 
     // if it exists, then we display its value
