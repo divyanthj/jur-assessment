@@ -12,7 +12,11 @@ import {
   TableCell,
   TableRow,
   TableContainer,
-  Switch
+  Switch,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel
 } from "@material-ui/core";
 import { ContractForm } from "@drizzle/react-components";
 const styles = {
@@ -20,6 +24,9 @@ const styles = {
   table: {
     minWidth: 650,
     tableLayout: "fixed"
+  },
+  formControl: {
+    width: 100
   }
 };
 
@@ -27,6 +34,7 @@ class MyComponent extends React.Component {
   state = {
     dataKeys: {},
     enteredStatusType: "",
+    enteredStatusTypeIndex: 0,
     statusTypes: [],
     statuses: [],
     addresses: [],
@@ -84,7 +92,6 @@ class MyComponent extends React.Component {
       const pulledItem = JurStatus[arrayName][dataKeys[arrayName + i]];
       if (pulledItem) array.push(pulledItem);
     }
-    console.log("Array " + arrayName, array);
     this.setState({
       dataKeys: {
         ...dataKeys
@@ -114,7 +121,6 @@ class MyComponent extends React.Component {
         statuses.push(statusObject);
       }
     });
-    console.log("Statuses", statuses);
     this.setState({
       statuses
     });
@@ -127,10 +133,15 @@ class MyComponent extends React.Component {
     if (this.state.statusTypesCount > 0)
       this.fetchArray("statusTypes", "statusTypesCount");
     if (this.state.addresses.length > 0) this.fetchAllStatuses();
-    //console.log("React state", this.state);
   };
 
   handleInputChange = e => {
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  };
+
+  handleSelectChange = e => {
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -147,7 +158,6 @@ class MyComponent extends React.Component {
     });
     const stackId = contract.methods[method].cacheSend(...submittedData);
     this.setState({ stackId });
-    this.pollData();
   };
 
   getTxStatus = () => {
@@ -159,10 +169,7 @@ class MyComponent extends React.Component {
 
     // if transaction hash does not exist, don't display anything
     if (!txHash) return null;
-
-    // otherwise, return the transaction status
-    return `Transaction status: ${transactions[txHash] &&
-      transactions[txHash].status}`;
+    return transactions[txHash].status;
   };
 
   render() {
@@ -205,12 +212,18 @@ class MyComponent extends React.Component {
             name={"enteredStatusHolderAddress"}
             value={enteredStatusHolderAddress}
           />
-          <Input
-            onChange={this.handleInputChange}
-            placeholder={"Status type index"}
-            name={"enteredStatusTypeIndex"}
-            value={enteredStatusTypeIndex}
-          />
+
+          <FormControl style={styles.formControl}>
+            <Select
+              value={enteredStatusTypeIndex}
+              onChange={this.handleSelectChange}
+              name={"enteredStatusTypeIndex"}
+            >
+              {this.state.statusTypes.map((typeItem, index) => {
+                return <MenuItem value={index}>{typeItem.value}</MenuItem>;
+              })}
+            </Select>
+          </FormControl>
           <Button
             variant="contained"
             color="primary"
@@ -281,8 +294,6 @@ class MyComponent extends React.Component {
             })}
           </Grid>
         </Grid>
-
-        <div>{this.getTxStatus()}</div>
       </Grid>
     );
   }
