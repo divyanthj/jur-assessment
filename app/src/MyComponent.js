@@ -5,17 +5,11 @@ import {
   Input,
   Button,
   Grid,
-  Table,
-  TableBody,
-  TableHead,
-  TableCell,
-  TableRow,
-  TableContainer,
   Switch,
   MenuItem,
   FormControl,
   Select,
-  InputLabel
+  CircularProgress
 } from "@material-ui/core";
 import { ContractForm } from "@drizzle/react-components";
 const styles = {
@@ -26,6 +20,9 @@ const styles = {
   },
   formControl: {
     width: 100
+  },
+  loader: {
+    marginLeft: 20
   }
 };
 
@@ -48,8 +45,9 @@ class MyComponent extends React.Component {
 
   componentDidUpdate = () => {
     const transactionStatus = this.getTxStatus();
+
     if (this.state.transactionStatus !== transactionStatus) {
-      if (transactionStatus === "success") setTimeout(this.pollData, 2000);
+      if (transactionStatus === "success") setTimeout(this.pollData, 1000);
       this.setState({
         transactionStatus
       });
@@ -71,7 +69,6 @@ class MyComponent extends React.Component {
 
   fetchPrimitive = variableName => {
     const { drizzle, drizzleState } = this.props;
-    console.log("Fetching primitive ", variableName);
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
 
@@ -92,7 +89,6 @@ class MyComponent extends React.Component {
 
   fetchArray = (arrayName, arrayCounterName) => {
     const { drizzle, drizzleState } = this.props;
-    console.log("Fetching array ", arrayName);
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
     let dataKeys = {};
@@ -113,7 +109,6 @@ class MyComponent extends React.Component {
   fetchAllStatuses = () => {
     const { statusCount, addresses } = this.state;
     const { drizzle, drizzleState } = this.props;
-    console.log("Fetching all statuses");
     const contract = drizzle.contracts.JurStatus;
     const { JurStatus } = this.props.drizzleState.contracts;
     let dataKeys = {};
@@ -147,15 +142,13 @@ class MyComponent extends React.Component {
 
   handleInputChange = e => {
     this.setState({
-      [e.target.name]: e.target.value,
-      transactionStatus: null
+      [e.target.name]: e.target.value
     });
   };
 
   handleSelectChange = e => {
     this.setState({
-      [e.target.name]: e.target.value,
-      transactionStatus: null
+      [e.target.name]: e.target.value
     });
   };
 
@@ -169,8 +162,11 @@ class MyComponent extends React.Component {
       submittedData.push(this.state[param]);
     });
     const stackId = contract.methods[method].cacheSend(...submittedData);
-    this.setState({ stackId });
-    console.log("Drizzle state", drizzleState);
+    this.setState({
+      stackId,
+      lastSetMethod: method,
+      lastSetParam: params[0]
+    });
   };
 
   getTxStatus = () => {
@@ -179,10 +175,12 @@ class MyComponent extends React.Component {
 
     // get the transaction hash using our saved `stackId`
     const txHash = transactionStack[this.state.stackId];
-
-    // if transaction hash does not exist, don't display anything
     if (!txHash) return null;
     return transactions[txHash] ? transactions[txHash].status : null;
+  };
+
+  renderLoader = () => {
+    return <CircularProgress size={11} style={styles.loader} />;
   };
 
   render() {
@@ -191,15 +189,23 @@ class MyComponent extends React.Component {
       enteredStatusType,
       enteredStatusHolderAddress,
       enteredStatusTypeIndex,
-      statuses
+      statuses,
+      transactionStatus,
+      lastSetParam,
+      lastSetMethod
     } = this.state;
-    // using the saved `dataKey`, get the variable we're interested in
 
-    // if it exists, then we display its value
+    // Misc bools for conditional rendering
+    const isPending = transactionStatus === "pending";
+    const isStatusTypeSubmitting =
+      isPending && lastSetMethod === "addStatusType";
+    const isStatusSubmitting = isPending && lastSetParam === "addJurStatus";
+
     return (
       <Grid container style={styles.container}>
         <Grid item xs={12}>
           {/* Form for adding new status type */}
+
           <Input
             onChange={this.handleInputChange}
             placeholder={"New status type"}
@@ -216,6 +222,7 @@ class MyComponent extends React.Component {
           >
             Submit
           </Button>
+          {isStatusTypeSubmitting && this.renderLoader()}
         </Grid>
         <Grid item xs={12}>
           {/* Form for adding address and type */}
@@ -250,6 +257,7 @@ class MyComponent extends React.Component {
           >
             Submit
           </Button>
+          {isStatusSubmitting && this.renderLoader()}
           <Grid item xs={9}>
             {/* Table of addresses, activation times and types */}
             <Grid container>
@@ -259,13 +267,14 @@ class MyComponent extends React.Component {
               <Grid item xs={3}>
                 Activation Time
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={2}>
                 Status Type
               </Grid>
 
               <Grid item xs={1}>
                 Is active
               </Grid>
+              <Grid item xs={1}></Grid>
             </Grid>
             {statuses.map(statusItem => {
               return (
@@ -278,7 +287,7 @@ class MyComponent extends React.Component {
                       "YYYY-MM-DD HH:mm"
                     )}
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid item xs={2}>
                     {statusItem.statusType}
                   </Grid>
                   <Grid item xs={1}>
@@ -301,6 +310,11 @@ class MyComponent extends React.Component {
                       color="primary"
                       inputProps={{ "aria-label": "primary checkbox" }}
                     />
+                  </Grid>
+                  <Grid item xs={1}>
+                    {this.state[lastSetParam] === statusItem.holder &&
+                      transactionStatus === "pending" &&
+                      this.renderLoader()}
                   </Grid>
                 </Grid>
               );
