@@ -1,6 +1,7 @@
 import React from "react";
 import moment from "moment-timezone";
 import logo from "./logo.png";
+import { withStyles } from "@material-ui/core/styles";
 import {
   Input,
   TextField,
@@ -21,11 +22,15 @@ const styles = {
     tableLayout: "fixed"
   },
   tableRow: {
-    width: "100%"
+    width: "100%",
+    paddingBottom: 11
   },
   tableCell: {
     width: "25%",
     float: "left"
+  },
+  tableCellSmaller: {
+    width: "10%"
   },
   formControl: {
     width: 100
@@ -197,7 +202,8 @@ class MyComponent extends React.Component {
   };
 
   renderLoader = () => {
-    return <CircularProgress size={11} style={styles.loader} />;
+    const { classes } = this.props;
+    return <CircularProgress size={11} className={classes.loader} />;
   };
 
   render() {
@@ -212,12 +218,13 @@ class MyComponent extends React.Component {
       lastSetMethod
     } = this.state;
 
+    const { classes } = this.props;
+
     // Misc bools for conditional rendering
     const isPending = transactionStatus === "pending";
-    const isStatusTypeSubmitting = !(
-      isPending && lastSetMethod === "addStatusType"
-    );
-    const isStatusSubmitting = !(isPending && lastSetParam === "addJurStatus");
+    const isStatusTypeSubmitting =
+      isPending && lastSetMethod === "addStatusType";
+    const isStatusSubmitting = isPending && lastSetParam === "addJurStatus";
 
     return (
       <div>
@@ -238,7 +245,7 @@ class MyComponent extends React.Component {
             onClick={() =>
               this.handleSubmit(["enteredStatusType"], "addStatusType")
             }
-            style={styles.submit}
+            className={classes.submit}
           >
             Submit
           </Button>
@@ -256,7 +263,10 @@ class MyComponent extends React.Component {
             value={enteredStatusHolderAddress}
           />
 
-          <FormControl style={styles.formControl} style={styles.select}>
+          <FormControl
+            className={classes.formControl}
+            className={classes.select}
+          >
             <InputLabel shrink id="demo-simple-select-placeholder-label-label">
               Status Type
             </InputLabel>
@@ -280,33 +290,47 @@ class MyComponent extends React.Component {
                 "addJurStatus"
               )
             }
-            style={styles.submit}
+            className={classes.submit}
           >
             Submit
           </Button>
           {isStatusSubmitting && this.renderLoader()}
         </div>
 
-        <div style={styles.table}>
+        <div className={classes.table}>
           {/* Table of addresses, activation times and types */}
-          <div style={styles.tableRow}>
-            <div style={styles.tableCell}>Holder</div>
-            <div style={styles.tableCell}>Activation Time</div>
-            <div style={styles.tableCell}>Status Type</div>
+          <div className={classes.tableRow} style={{ fontWeight: 500 }}>
+            <div className={classes.tableCell}>Holder</div>
+            <div className={classes.tableCell + " " + classes.tableCellSmaller}>
+              Activation Time
+            </div>
+            <div className={classes.tableCell + " " + classes.tableCellSmaller}>
+              Status Type
+            </div>
 
             <div>Is active</div>
           </div>
           {statuses.map(statusItem => {
             return (
-              <div style={styles.tableRow}>
-                <div style={styles.tableCell}>{statusItem.holder}</div>
-                <div style={styles.tableCell}>
+              <div className={classes.tableRow}>
+                <div className={classes.tableCell} style={{ fontSize: 14 }}>
+                  {statusItem.holder}
+                </div>
+                <div
+                  className={classes.tableCell + " " + classes.tableCellSmaller}
+                >
                   {moment(statusItem.activationTime * 1000).format(
                     "YYYY-MM-DD HH:mm"
                   )}
                 </div>
-                <div style={styles.tableCell}>{statusItem.statusType}</div>
-                <div style={styles.tableCell}>
+                <div
+                  className={classes.tableCell + " " + classes.tableCellSmaller}
+                >
+                  {statusItem.statusType}
+                </div>
+                <div
+                  className={classes.tableCell + " " + classes.tableCellSmaller}
+                >
                   <Switch
                     checked={statusItem.isActive}
                     onChange={() => {
@@ -326,12 +350,10 @@ class MyComponent extends React.Component {
                     color="primary"
                     inputProps={{ "aria-label": "primary checkbox" }}
                   />
-                </div>
-                {/*<div>
-                  {!(this.state[lastSetParam] === statusItem.holder) &&
+                  {this.state[lastSetParam] === statusItem.holder &&
                     transactionStatus === "pending" &&
                     this.renderLoader()}
-                </div> */}
+                </div>
               </div>
             );
           })}
@@ -341,4 +363,4 @@ class MyComponent extends React.Component {
   }
 }
 
-export default MyComponent;
+export default withStyles(styles)(MyComponent);
