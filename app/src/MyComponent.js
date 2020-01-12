@@ -19,15 +19,16 @@ const styles = {
   tableCell: {},
   table: {
     minWidth: 650,
+    marginTop: 18,
     tableLayout: "fixed"
   },
   tableRow: {
     width: "100%",
-    paddingBottom: 11
+    display: "block"
   },
   tableCell: {
-    width: "25%",
-    float: "left"
+    width: "20%",
+    display: "inline-block"
   },
   tableCellSmaller: {
     width: "10%"
@@ -213,6 +214,7 @@ class MyComponent extends React.Component {
       enteredStatusHolderAddress,
       enteredStatusTypeIndex,
       statuses,
+      statusTypes,
       transactionStatus,
       lastSetParam,
       lastSetMethod
@@ -235,7 +237,7 @@ class MyComponent extends React.Component {
             label={"New status type"}
             name={"enteredStatusType"}
             value={enteredStatusType}
-            style={{ width: 282 }}
+            style={{ width: 500 }}
           />
 
           <Button
@@ -253,111 +255,136 @@ class MyComponent extends React.Component {
           {isStatusTypeSubmitting && this.renderLoader()}
         </div>
 
-        <div>
-          {/* Form for adding address and type */}
+        {statusTypes.length > 0 && (
+          <div>
+            {/* Form for adding address and type */}
 
-          <TextField
-            onChange={this.handleInputChange}
-            label={"Status holder address"}
-            name={"enteredStatusHolderAddress"}
-            value={enteredStatusHolderAddress}
-          />
+            <TextField
+              onChange={this.handleInputChange}
+              label={"Status holder address"}
+              name={"enteredStatusHolderAddress"}
+              value={enteredStatusHolderAddress}
+              style={{ width: 400 }}
+            />
 
-          <FormControl
-            className={classes.formControl}
-            className={classes.select}
-          >
-            <InputLabel shrink id="demo-simple-select-placeholder-label-label">
-              Status Type
-            </InputLabel>
-            <Select
-              value={enteredStatusTypeIndex}
-              onChange={this.handleSelectChange}
-              name={"enteredStatusTypeIndex"}
+            <FormControl
+              className={classes.formControl}
+              className={classes.select}
             >
-              {this.state.statusTypes.map((typeItem, index) => {
-                return <MenuItem value={index}>{typeItem.value}</MenuItem>;
-              })}
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() =>
-              this.handleSubmit(
-                ["enteredStatusHolderAddress", "enteredStatusTypeIndex"],
-                "addJurStatus"
-              )
-            }
-            className={classes.submit}
-          >
-            Submit
-          </Button>
-          {isStatusSubmitting && this.renderLoader()}
-        </div>
-
-        <div className={classes.table}>
-          {/* Table of addresses, activation times and types */}
-          <div className={classes.tableRow} style={{ fontWeight: 500 }}>
-            <div className={classes.tableCell}>Holder</div>
-            <div className={classes.tableCell + " " + classes.tableCellSmaller}>
-              Activation Time
-            </div>
-            <div className={classes.tableCell + " " + classes.tableCellSmaller}>
-              Status Type
-            </div>
-
-            <div>Is active</div>
+              <InputLabel
+                shrink
+                id="demo-simple-select-placeholder-label-label"
+              >
+                Status Type
+              </InputLabel>
+              <Select
+                value={enteredStatusTypeIndex}
+                onChange={this.handleSelectChange}
+                name={"enteredStatusTypeIndex"}
+              >
+                {this.state.statusTypes.map((typeItem, index) => {
+                  return <MenuItem value={index}>{typeItem.value}</MenuItem>;
+                })}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() =>
+                this.handleSubmit(
+                  ["enteredStatusHolderAddress", "enteredStatusTypeIndex"],
+                  "addJurStatus"
+                )
+              }
+              className={classes.submit}
+            >
+              Submit
+            </Button>
+            {isStatusSubmitting && this.renderLoader()}
           </div>
-          {statuses.map(statusItem => {
-            return (
-              <div className={classes.tableRow}>
-                <div className={classes.tableCell} style={{ fontSize: 14 }}>
-                  {statusItem.holder}
-                </div>
-                <div
-                  className={classes.tableCell + " " + classes.tableCellSmaller}
-                >
-                  {moment(statusItem.activationTime * 1000).format(
-                    "YYYY-MM-DD HH:mm"
-                  )}
-                </div>
-                <div
-                  className={classes.tableCell + " " + classes.tableCellSmaller}
-                >
-                  {statusItem.statusType}
-                </div>
-                <div
-                  className={classes.tableCell + " " + classes.tableCellSmaller}
-                >
-                  <Switch
-                    checked={statusItem.isActive}
-                    onChange={() => {
-                      this.setState(
-                        {
-                          currentHolder: statusItem.holder,
-                          currentIsActive: !statusItem.isActive
-                        },
-                        () => {
-                          this.handleSubmit(
-                            ["currentHolder", "currentIsActive"],
-                            "changeState"
-                          );
-                        }
-                      );
-                    }}
-                    color="primary"
-                    inputProps={{ "aria-label": "primary checkbox" }}
-                  />
-                  {this.state[lastSetParam] === statusItem.holder &&
-                    transactionStatus === "pending" &&
-                    this.renderLoader()}
-                </div>
+        )}
+
+        {statuses.length > 0 && (
+          <div className={classes.table}>
+            {/* Table of addresses, activation times and types */}
+            <div
+              className={classes.tableRow}
+              style={{ fontWeight: 500, paddingBottom: 12 }}
+            >
+              <div className={classes.tableCell}>Holder</div>
+              <div
+                className={classes.tableCell + " " + classes.tableCellSmaller}
+              >
+                Activation Time
               </div>
-            );
-          })}
-        </div>
+              <div
+                className={classes.tableCell + " " + classes.tableCellSmaller}
+              >
+                Status Type
+              </div>
+
+              <div
+                className={classes.tableCell + " " + classes.tableCellSmaller}
+              >
+                Is active
+              </div>
+            </div>
+            {statuses.map(statusItem => {
+              return (
+                <div className={classes.tableRow}>
+                  <div className={classes.tableCell} style={{ fontSize: 14 }}>
+                    {statusItem.holder}
+                  </div>
+                  <div
+                    className={
+                      classes.tableCell + " " + classes.tableCellSmaller
+                    }
+                  >
+                    {moment(statusItem.activationTime * 1000).format(
+                      "YYYY-MM-DD HH:mm"
+                    )}
+                  </div>
+                  <div
+                    className={
+                      classes.tableCell + " " + classes.tableCellSmaller
+                    }
+                  >
+                    {statusItem.statusType}
+                  </div>
+                  <div
+                    className={
+                      classes.tableCell + " " + classes.tableCellSmaller
+                    }
+                  >
+                    <Switch
+                      checked={statusItem.isActive}
+                      onChange={() => {
+                        this.setState(
+                          {
+                            currentHolder: statusItem.holder,
+                            currentIsActive: !statusItem.isActive
+                          },
+                          () => {
+                            this.handleSubmit(
+                              ["currentHolder", "currentIsActive"],
+                              "changeState"
+                            );
+                          }
+                        );
+                      }}
+                      color="primary"
+                      inputProps={{ "aria-label": "primary checkbox" }}
+                    />
+                    {this.state[lastSetParam] === statusItem.holder &&
+                      transactionStatus === "pending" &&
+                      this.renderLoader()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
