@@ -30,7 +30,7 @@ Then after cloning this repo,
 # App usage
 
 1. In the beginning, only the UI to add status types is visible.
-2. To add status type, type in a type and click "submit".
+2. To add status type, type in any string that represents a status-type and click "submit".
 3. After clicking "submit", MetaMask will prompt you to pay.
 4. After confirming payment, a new status type will have been added and UI to add new statuses will appear.
 5. Similarly, add a new status and pick an existing status type. Once done, a list of available statuses will be displayed below.
