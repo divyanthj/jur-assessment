@@ -29,10 +29,9 @@ class App extends Component {
 
   render() {
     const { drizzle } = this.props;
-    if (this.state.loading) return "Loading Drizzle...";
+    if (this.state.loading) return "Loading...";
     return (
       <div className="App">
-        Drizzle is ready
         {
           <MyComponent
             drizzle={drizzle}

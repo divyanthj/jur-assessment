@@ -3,13 +3,15 @@ import moment from "moment-timezone";
 import logo from "./logo.png";
 import {
   Input,
+  TextField,
   Button,
   Grid,
   Switch,
   MenuItem,
   FormControl,
   Select,
-  CircularProgress
+  CircularProgress,
+  InputLabel
 } from "@material-ui/core";
 import { ContractForm } from "@drizzle/react-components";
 const styles = {
@@ -18,11 +20,26 @@ const styles = {
     minWidth: 650,
     tableLayout: "fixed"
   },
+  tableRow: {
+    width: "100%"
+  },
+  tableCell: {
+    width: "25%",
+    float: "left"
+  },
   formControl: {
     width: 100
   },
   loader: {
-    marginLeft: 20
+    marginLeft: 0,
+    marginTop: 2
+  },
+  submit: {
+    margin: 18
+  },
+  select: {
+    marginTop: 0.5,
+    width: 100
   }
 };
 
@@ -197,21 +214,23 @@ class MyComponent extends React.Component {
 
     // Misc bools for conditional rendering
     const isPending = transactionStatus === "pending";
-    const isStatusTypeSubmitting =
-      isPending && lastSetMethod === "addStatusType";
-    const isStatusSubmitting = isPending && lastSetParam === "addJurStatus";
+    const isStatusTypeSubmitting = !(
+      isPending && lastSetMethod === "addStatusType"
+    );
+    const isStatusSubmitting = !(isPending && lastSetParam === "addJurStatus");
 
     return (
-      <Grid container style={styles.container}>
-        <Grid item xs={12}>
-          {/* Form for adding new status type */}
-
-          <Input
+      <div>
+        {/* Form for adding new status type */}
+        <div>
+          <TextField
             onChange={this.handleInputChange}
-            placeholder={"New status type"}
+            label={"New status type"}
             name={"enteredStatusType"}
             value={enteredStatusType}
+            style={{ width: 282 }}
           />
+
           <Button
             variant="contained"
             color="primary"
@@ -219,21 +238,28 @@ class MyComponent extends React.Component {
             onClick={() =>
               this.handleSubmit(["enteredStatusType"], "addStatusType")
             }
+            style={styles.submit}
           >
             Submit
           </Button>
+
           {isStatusTypeSubmitting && this.renderLoader()}
-        </Grid>
-        <Grid item xs={12}>
+        </div>
+
+        <div>
           {/* Form for adding address and type */}
-          <Input
+
+          <TextField
             onChange={this.handleInputChange}
-            placeholder={"Status holder address"}
+            label={"Status holder address"}
             name={"enteredStatusHolderAddress"}
             value={enteredStatusHolderAddress}
           />
 
-          <FormControl style={styles.formControl}>
+          <FormControl style={styles.formControl} style={styles.select}>
+            <InputLabel shrink id="demo-simple-select-placeholder-label-label">
+              Status Type
+            </InputLabel>
             <Select
               value={enteredStatusTypeIndex}
               onChange={this.handleSelectChange}
@@ -254,74 +280,63 @@ class MyComponent extends React.Component {
                 "addJurStatus"
               )
             }
+            style={styles.submit}
           >
             Submit
           </Button>
           {isStatusSubmitting && this.renderLoader()}
-          <Grid item xs={9}>
-            {/* Table of addresses, activation times and types */}
-            <Grid container>
-              <Grid item xs={5}>
-                Holder
-              </Grid>
-              <Grid item xs={3}>
-                Activation Time
-              </Grid>
-              <Grid item xs={2}>
-                Status Type
-              </Grid>
+        </div>
 
-              <Grid item xs={1}>
-                Is active
-              </Grid>
-              <Grid item xs={1}></Grid>
-            </Grid>
-            {statuses.map(statusItem => {
-              return (
-                <Grid container>
-                  <Grid item xs={5}>
-                    {statusItem.holder}
-                  </Grid>
-                  <Grid item xs={3}>
-                    {moment(statusItem.activationTime * 1000).format(
-                      "YYYY-MM-DD HH:mm"
-                    )}
-                  </Grid>
-                  <Grid item xs={2}>
-                    {statusItem.statusType}
-                  </Grid>
-                  <Grid item xs={1}>
-                    <Switch
-                      checked={statusItem.isActive}
-                      onChange={() => {
-                        this.setState(
-                          {
-                            currentHolder: statusItem.holder,
-                            currentIsActive: !statusItem.isActive
-                          },
-                          () => {
-                            this.handleSubmit(
-                              ["currentHolder", "currentIsActive"],
-                              "changeState"
-                            );
-                          }
-                        );
-                      }}
-                      color="primary"
-                      inputProps={{ "aria-label": "primary checkbox" }}
-                    />
-                  </Grid>
-                  <Grid item xs={1}>
-                    {this.state[lastSetParam] === statusItem.holder &&
-                      transactionStatus === "pending" &&
-                      this.renderLoader()}
-                  </Grid>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Grid>
-      </Grid>
+        <div style={styles.table}>
+          {/* Table of addresses, activation times and types */}
+          <div style={styles.tableRow}>
+            <div style={styles.tableCell}>Holder</div>
+            <div style={styles.tableCell}>Activation Time</div>
+            <div style={styles.tableCell}>Status Type</div>
+
+            <div>Is active</div>
+          </div>
+          {statuses.map(statusItem => {
+            return (
+              <div style={styles.tableRow}>
+                <div style={styles.tableCell}>{statusItem.holder}</div>
+                <div style={styles.tableCell}>
+                  {moment(statusItem.activationTime * 1000).format(
+                    "YYYY-MM-DD HH:mm"
+                  )}
+                </div>
+                <div style={styles.tableCell}>{statusItem.statusType}</div>
+                <div style={styles.tableCell}>
+                  <Switch
+                    checked={statusItem.isActive}
+                    onChange={() => {
+                      this.setState(
+                        {
+                          currentHolder: statusItem.holder,
+                          currentIsActive: !statusItem.isActive
+                        },
+                        () => {
+                          this.handleSubmit(
+                            ["currentHolder", "currentIsActive"],
+                            "changeState"
+                          );
+                        }
+                      );
+                    }}
+                    color="primary"
+                    inputProps={{ "aria-label": "primary checkbox" }}
+                  />
+                </div>
+                {/*<div>
+                  {!(this.state[lastSetParam] === statusItem.holder) &&
+                    transactionStatus === "pending" &&
+                    this.renderLoader()}
+                </div> */}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
   }
 }
